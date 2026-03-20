@@ -48,11 +48,11 @@ def fetch_yahoo_ohlcv(
         end = datetime.date.fromisoformat(end)
         
     if start is None:
-        start = datetime.date(end.year - years, end.month, end.today)
+        start = datetime.date(end.year - years, end.month, end.day)
     if isinstance(start, str):
         start = datetime.date.fromisoformat(start)
         
-    raw = pd.DataFrame = yf.download(
+    raw: pd.DataFrame = yf.download(
         ticker,
         start=start,
         end=end,
