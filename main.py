@@ -22,7 +22,7 @@ from utils.search import pick_company
 def print_banner():
     print("""
           ╔══════════════════════════════════════╗
-          ║         📈  Stockholm v1.0          ║
+          ║         📈  Stockholm v1.0           ║
           ║   기술적 분석 & 백테스팅 시스템      ║
           ╚══════════════════════════════════════╝
           """)
