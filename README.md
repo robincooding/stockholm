@@ -14,7 +14,7 @@ Stockholm은 2022년에 작성된 주식 기술적 분석 스크립트를 **모�
 
 흩어져 있던 4개의 독립 스크립트(`SMA_EMA_Strategy_Automation.py`, `Trendline_Automation.py`, `SupportLine.py`, `ResistanceLine.py`)를 역할별 패키지로 재구성하고, 미완성이었던 백테스팅과 추가 지표를 완성했습니다.
 
-**한국 주식(네이버 금융)**과 **해외 주식(Yahoo Finance)** 을 모두 지원하며, CLI와 Jupyter Notebook 두 가지 환경에서 사용할 수 있습니다.
+**한국 주식(네이버 금융)** 과 **해외 주식(Yahoo Finance)** 을 모두 지원하며, CLI와 Jupyter Notebook 두 가지 환경에서 사용할 수 있습니다.
 
 ---
 
