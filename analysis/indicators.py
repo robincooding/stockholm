@@ -53,9 +53,9 @@ def add_ema(df: pd.DataFrame, windows: list[int] = [12, 26, 50, 200]) -> pd.Data
     """
     df = df.copy()
     for window in windows:
-        df[f"EMA_{window}"] = df["close"].ewm(
-            span=window, min_periods=window, adjust=False
-        ).mean()
+        df[f"EMA_{window}"] = (
+            df["close"].ewm(span=window, min_periods=window, adjust=False).mean()
+        )
     return df
 
 
@@ -81,7 +81,7 @@ def add_rsi(df: pd.DataFrame, window: int = 14) -> pd.DataFrame:
     df = df.copy()
     delta = df["close"].diff()
 
-    gain = delta.clip(lower=0)   # 상승분만
+    gain = delta.clip(lower=0)  # 상승분만
     loss = -delta.clip(upper=0)  # 하락분만 (양수로)
 
     avg_gain = gain.ewm(com=window - 1, min_periods=window).mean()
@@ -126,9 +126,9 @@ def add_macd(
     ema_slow = df["close"].ewm(span=slow, min_periods=slow, adjust=False).mean()
 
     df["MACD"] = ema_fast - ema_slow
-    df["MACD_signal"] = df["MACD"].ewm(
-        span=signal, min_periods=signal, adjust=False
-    ).mean()
+    df["MACD_signal"] = (
+        df["MACD"].ewm(span=signal, min_periods=signal, adjust=False).mean()
+    )
     df["MACD_hist"] = df["MACD"] - df["MACD_signal"]
     return df
 
@@ -164,7 +164,7 @@ def add_bollinger(
     mid = df["close"].rolling(window=window).mean()
     std = df["close"].rolling(window=window).std()
 
-    df["BB_mid"]   = mid
+    df["BB_mid"] = mid
     df["BB_upper"] = mid + num_std * std
     df["BB_lower"] = mid - num_std * std
     df["BB_width"] = (df["BB_upper"] - df["BB_lower"]) / df["BB_mid"]
@@ -184,9 +184,10 @@ def add_returns(df: pd.DataFrame) -> pd.DataFrame:
         - creturns : 누적 로그 수익률
     """
     df = df.copy()
-    df["returns"]  = np.log(df["close"] / df["close"].shift(1))
+    df["returns"] = np.log(df["close"] / df["close"].shift(1))
     df["creturns"] = df["returns"].cumsum().apply(np.exp)
     return df
+
 
 # === 모든 지표 추가 ===
 def add_all_indicators(df: pd.DataFrame) -> pd.DataFrame:

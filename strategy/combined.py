@@ -11,10 +11,11 @@ import numpy as np
 from strategy.base import Strategy
 from analysis.indicators import add_sma, add_rsi, add_macd, add_bollinger
 
+
 class RSIMACDStrategy(Strategy):
     """
     RSI + MACD + SMA 조합 전략 클래스.
-    
+
     매수 조건 (3가지 동시 충족):
       1. RSI < rsi_oversold  (과매도)
       2. MACD > MACD_signal  (상승 모멘텀)
@@ -35,6 +36,7 @@ class RSIMACDStrategy(Strategy):
     sma_window : int
         추세 필터용 SMA 기간 (기본값: 50)
     """
+
     def __init__(
         self,
         rsi_window: int = 14,
@@ -44,44 +46,37 @@ class RSIMACDStrategy(Strategy):
     ):
         super().__init__(name=f"RSI+MACD+SMA({sma_window})")
         self.rsi_window = rsi_window
-        self.rsi_oversold   = rsi_oversold
+        self.rsi_oversold = rsi_oversold
         self.rsi_overbought = rsi_overbought
-        self.sma_window     = sma_window
-        
+        self.sma_window = sma_window
+
     def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
         df = add_rsi(df, window=self.rsi_window)
         df = add_macd(df)
         df = add_sma(df, windows=[self.sma_window])
         df.dropna(inplace=True)
-        
+
         rsi_col = f"RSI_{self.rsi_window}"
         sma_col = f"SMA_{self.sma_window}"
-        
+
         df["signal"] = 0
-        
+
         # MACD 크로스 방향 감지
-        macd_cross_up = (
-            (df["MACD"].shift(1) < df["MACD_signal"].shift(1)) &
-            (df["MACD"] > df["MACD_signal"])
-        )
-        
-        macd_cross_down = (
-            (df["MACD"].shift(1) > df["MACD_signal"].shift(1)) &
-            (df["MACD"] < df["MACD_signal"])
-        )
-        
-        # 매수: MACD 상승 크로스 + RSI 50이하
-        buy_cond = (
-            macd_cross_up & (df[rsi_col] < 50)
-        )
-        
-        # 매도: RSI 과매수 OR MACD 하락 크로스
-        sell_cond = (
-            (df[rsi_col] > self.rsi_overbought) |
-            macd_cross_down
+        macd_cross_up = (df["MACD"].shift(1) < df["MACD_signal"].shift(1)) & (
+            df["MACD"] > df["MACD_signal"]
         )
 
-        df.loc[buy_cond,  "signal"] = 1
+        macd_cross_down = (df["MACD"].shift(1) > df["MACD_signal"].shift(1)) & (
+            df["MACD"] < df["MACD_signal"]
+        )
+
+        # 매수: MACD 상승 크로스 + RSI 50이하
+        buy_cond = macd_cross_up & (df[rsi_col] < 50)
+
+        # 매도: RSI 과매수 OR MACD 하락 크로스
+        sell_cond = (df[rsi_col] > self.rsi_overbought) | macd_cross_down
+
+        df.loc[buy_cond, "signal"] = 1
         df.loc[sell_cond, "signal"] = -1
 
         # 포지션 없을 때 매도 신호 무시
@@ -100,10 +95,11 @@ class RSIMACDStrategy(Strategy):
 
         return df
 
+
 class BollingerRSIStrategy(Strategy):
     """
     볼린저밴드 + RSI 조합 전략 클래스.
-    
+
     매수 조건 (2가지 동시 충족):
       1. 종가 < BB 하단 (밴드 하단 터치)
       2. RSI < rsi_oversold (과매도 확인)
@@ -125,6 +121,7 @@ class BollingerRSIStrategy(Strategy):
     rsi_overbought : float
         RSI 과매수 기준 (기본값: 60)
     """
+
     def __init__(
         self,
         bb_window: int = 20,
@@ -134,16 +131,16 @@ class BollingerRSIStrategy(Strategy):
         rsi_overbought: float = 60,
     ):
         super().__init__(name=f"Bollinger+RSI({bb_window}/{rsi_window})")
-        self.bb_window      = bb_window
-        self.bb_std         = bb_std
-        self.rsi_window     = rsi_window
-        self.rsi_oversold   = rsi_oversold
+        self.bb_window = bb_window
+        self.bb_std = bb_std
+        self.rsi_window = rsi_window
+        self.rsi_oversold = rsi_oversold
         self.rsi_overbought = rsi_overbought
 
     def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
         df = add_bollinger(df, window=self.bb_window, num_std=self.bb_std)
         df = add_rsi(df, window=self.rsi_window)
-        df = add_sma(df, windows=[200]) # 장기 추세 필터
+        df = add_sma(df, windows=[200])  # 장기 추세 필터
         df.dropna(inplace=True)
 
         rsi_col = f"RSI_{self.rsi_window}"
@@ -152,24 +149,19 @@ class BollingerRSIStrategy(Strategy):
 
         # 매수: BB 하단 터치 + RSI 과매도 + 장기 상승 추세 (SMA 200 위)
         buy_cond = (
-            (df["close"] < df["BB_lower"]) &
-            (df[rsi_col] < self.rsi_oversold) &
-            (df["close"] > df["SMA_200"]) # 하락 추세에서는 매수 안 함
-        )
-        
-        # 매도: BB 상단 터치 + RSI 과매수
-        sell_cond = (
-            (df["close"] > df["BB_upper"]) &
-            (df[rsi_col] > self.rsi_overbought)
+            (df["close"] < df["BB_lower"])
+            & (df[rsi_col] < self.rsi_oversold)
+            & (df["close"] > df["SMA_200"])  # 하락 추세에서는 매수 안 함
         )
 
-        df.loc[buy_cond,  "signal"] = 1
+        # 매도: BB 상단 터치 + RSI 과매수
+        sell_cond = (df["close"] > df["BB_upper"]) & (df[rsi_col] > self.rsi_overbought)
+
+        df.loc[buy_cond, "signal"] = 1
         df.loc[sell_cond, "signal"] = -1
 
         # 연속 신호 제거
-        df["signal"] = df["signal"].where(
-            df["signal"] != df["signal"].shift(1), 0
-        )
+        df["signal"] = df["signal"].where(df["signal"] != df["signal"].shift(1), 0)
 
         df["position"] = df["signal"].replace(-1, 0)
         df["position"] = df["position"].ffill().fillna(0)
