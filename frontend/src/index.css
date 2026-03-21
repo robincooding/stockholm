@@ -1,13 +1,24 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary:  #1A3A5C;
+  --color-accent:   #2E86C1;
+  --color-bull:     #27AE60;
+  --color-bear:     #E74C3C;
+  --color-neutral:  #566573;
+  --color-darkbg:   #0F1923;
+  --color-cardbg:   #1A2535;
+  --color-border:   #2C3E50;
+  --font-sans: 'Inter', sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  background-color: #0F1923;
+  color: #ECF0F1;
+  font-family: 'Inter', sans-serif;
 }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1A2535; }
+::-webkit-scrollbar-thumb { background: #2E86C1; border-radius: 3px; }
