@@ -88,7 +88,7 @@ def fetch_naver_ohlcv(code: str, count: int = DEFAULT_COUNT) -> pd.DataFrame:
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.set_index("date")
-    df = df.apply(pd.to_numeric, error="coerce").dropna()
+    df = df.apply(pd.to_numeric, errors="coerce").dropna()
     df = df.astype(int)
     df = df.sort_index() # 오름차순 정렬
 
